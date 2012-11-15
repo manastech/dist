@@ -10,7 +10,7 @@ class Dist::Builder
   end
 
   def build
-    # compile_assets
+    compile_assets
     build_output
     export_services
     export_control
@@ -26,8 +26,7 @@ class Dist::Builder
   private
 
   def compile_assets
-    Rake::Task["assets:clean"].invoke
-    Rake::Task["assets:precompile"].invoke
+    `bundle exec rake assets:clean assets:precompile`
   end
 
   def build_output

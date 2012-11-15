@@ -8,5 +8,5 @@ env HOME=/usr/share/<%= app_name %>
 
 script
   . /etc/default/<%= app_name %>
-  .gems/bin/passenger start -e production -p $HTTP_PORT
+  .gems/bin/passenger start -e production -p $HTTP_PORT --user root
 end script
