@@ -1,0 +1,9 @@
+mysql:
+  - mysql-server
+  - libmysqlclient-dev
+redis:
+  - redis-server
+mail:
+  - mail-transport-agent
+elasticsearch:
+  - elasticsearch

@@ -1,0 +1,10 @@
+Package: <%= app_name %>
+Version: <%= config.version %>
+Section: devel
+Priority: optional
+Architecture: all
+Pre-Depends: debconf
+Depends: <%= packages.join ', ' %>
+Maintainer: <%= config.maintainer %>
+Description: <%= config.description %>
+  <%= config.description %>
