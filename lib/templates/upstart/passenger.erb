@@ -7,6 +7,6 @@ env GEM_HOME=/usr/share/<%= app_name %>/.gems
 env HOME=/usr/share/<%= app_name %>
 
 script
-  . /etc/default/resourcemap
+  . /etc/default/<%= app_name %>
   .gems/bin/passenger start -e production -p $HTTP_PORT
 end script
