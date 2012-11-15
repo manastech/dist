@@ -12,6 +12,7 @@ class Dist::Builder
     build_output
     export_services
     export_control
+    build_package
   end
 
   private
@@ -64,6 +65,10 @@ class Dist::Builder
       write_template "debian/#{control_file}", "debian/DEBIAN/#{control_file}"
       chmod '+x', "debian/DEBIAN/#{control_file}"
     end
+  end
+
+  def build_package
+    `fakeroot dpkg-deb --build debian #{app_name}_#{config.version}.deb`
   end
 
   def app_name
