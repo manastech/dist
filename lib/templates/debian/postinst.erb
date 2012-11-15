@@ -1,0 +1,36 @@
+#!/bin/bash
+
+. /usr/share/debconf/confmodule
+
+case "$1" in
+  configure)
+    cd /usr/share/<%= app_name %>
+    export RAILS_ENV=production
+    export GEM_HOME=/usr/share/<%= app_name %>/.gems
+    export GEM_PATH=
+    
+    gem1.9.1 install bundler --no-ri --no-rdoc
+    gem1.9.1 install rake -v=0.9.2.2 --no-ri --no-rdoc
+    gem1.9.1 install passenger --no-ri --no-rdoc
+
+    BUNDLE=/usr/share/<%= app_name %>/.gems/bin/bundle
+
+    $BUNDLE install --deployment --without=development test assets
+    $BUNDLE clean
+
+    # Get the current DB version to check if it actually exists
+    $BUNDLE exec rake db:version
+
+    # Create or upgrade the database
+    if [ $? -eq 0 ]; then
+            $BUNDLE exec rake db:migrate
+    else
+            $BUNDLE exec rake db:setup
+    fi
+
+    start <%= app_name %>
+
+  ;;
+esac
+
+exit 0

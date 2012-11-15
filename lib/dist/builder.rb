@@ -59,6 +59,11 @@ class Dist::Builder
 
   def export_control
     write_template 'debian/control', 'debian/DEBIAN/control'
+
+    %w(postinst prerm postrm).each do |control_file|
+      write_template "debian/#{control_file}", "debian/DEBIAN/#{control_file}"
+      chmod '+x', "debian/DEBIAN/#{control_file}"
+    end
   end
 
   def app_name
