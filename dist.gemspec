@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version       = Dist::VERSION
   gem.authors       = ["Ary Borenszweig", "Juan Wajnerman"]
   gem.email         = ["aborenszweig@manas.com.ar", "jwajnerman@manas.com.ar"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{Generate packages to distribute Rails applications}
+  gem.summary       = %q{Generate packages to distribute Rails applications}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
