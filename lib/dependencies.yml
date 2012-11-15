@@ -1,3 +1,9 @@
+default:
+  - ruby1.9.1
+  - ruby1.9.1-dev
+  - build-essential
+  - libcurl4-openssl-dev
+  - libssl-dev
 mysql:
   - mysql-server
   - libmysqlclient-dev

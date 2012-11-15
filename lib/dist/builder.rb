@@ -77,9 +77,9 @@ class Dist::Builder
   end
 
   def compute_packages
-    packages = %w(ruby1.9.1 ruby1.9.1-dev build-essential libcurl4-openssl-dev libssl-dev)
-
     dependencies_yml = YAML.load_file File.expand_path('../../dependencies.yml', __FILE__)
+    packages = dependencies_yml['default']
+
     config.dependencies.each do |dependency|
       dependency_packages = dependencies_yml[dependency.to_s]
       if dependency_packages
