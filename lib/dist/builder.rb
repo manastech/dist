@@ -1,4 +1,6 @@
 require 'erb'
+require 'fileutils'
+require 'yaml'
 
 class Dist::Builder
   include FileUtils
@@ -54,6 +56,9 @@ class Dist::Builder
 
     procfile.each do |service_name, service_command|
       next if service_name == 'web'
+      if service_command =~ /\Abundle\s+exec\s+(.*)/
+        service_command = $1
+      end
       write_template 'upstart/service', "debian/etc/init/#{app_name}-#{service_name}.conf", binding
     end
   end
@@ -72,13 +77,13 @@ class Dist::Builder
   end
 
   def app_name
-    @app_name ||= Rails.application.class.parent_name.downcase
+    @app_name ||= config.application
   end
 
   def config
     @config ||=
       Dist::Configuration.new.tap do |config|
-        config.instance_eval File.read("#{Rails.root}/config/dist.rb")
+        config.instance_eval File.read("config/dist.rb")
       end
   end
 

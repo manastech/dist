@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'dist'
+
+Dist::Builder.new.build
