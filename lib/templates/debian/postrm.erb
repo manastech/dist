@@ -6,4 +6,11 @@ if [ "$1" = purge ]; then
   rm -Rf /var/lib/<%= app_name %>/tmp/*
   rm -Rf /var/log/<%= app_name %>/*
   rm -f /usr/share/<%= app_name %>/.bundle/config
+  rm -f /etc/default/<%= app_name %>
+
+  if [ -e /usr/share/debconf/confmodule ]; then
+    . /usr/share/debconf/confmodule
+    db_purge
+  fi
 fi
+

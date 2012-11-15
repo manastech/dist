@@ -1,0 +1,5 @@
+#!/bin/bash
+. /usr/share/debconf/confmodule
+
+db_input high <%= app_name %>/http_port
+db_go

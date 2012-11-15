@@ -6,4 +6,7 @@ chdir /usr/share/<%= app_name %>
 env GEM_HOME=/usr/share/<%= app_name %>/.gems
 env HOME=/usr/share/<%= app_name %>
 
-exec .gems/bin/passenger start -e production
+script
+  . /etc/default/resourcemap
+  .gems/bin/passenger start -e production -p $HTTP_PORT
+end script
