@@ -1,0 +1,10 @@
+start on starting <%= app_name %>
+stop on stopping <%= app_name %>
+respawn
+
+chdir /usr/share/<%= app_name %>
+env GEM_HOME=/usr/share/<%= app_name %>/.gems
+env RAILS_ENV=production
+env HOME=/usr/share/<%= app_name %>
+
+exec .gems/bin/bundle exec <%= service_command %> >> /var/log/<%= app_name %>/<%= service_name %>.log 2>&1
