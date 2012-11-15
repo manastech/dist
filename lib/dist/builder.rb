@@ -56,17 +56,19 @@ class Dist::Builder
   end
 
   def export_services
-    procfile = YAML.load_file 'Procfile'
-    rm_f 'debian/etc/init/*'
+    if File.exists? 'Procfile'
+      procfile = YAML.load_file 'Procfile'
+      rm_f 'debian/etc/init/*'
 
-    write_template 'upstart/main', "debian/etc/init/#{app_name}.conf"
+      write_template 'upstart/main', "debian/etc/init/#{app_name}.conf"
 
-    procfile.each do |service_name, service_command|
-      next if service_name == 'web'
-      if service_command =~ /\Abundle\s+exec\s+(.*)/
-        service_command = $1
+      procfile.each do |service_name, service_command|
+        next if service_name == 'web'
+        if service_command =~ /\Abundle\s+exec\s+(.*)/
+          service_command = $1
+        end
+        write_template 'upstart/service', "debian/etc/init/#{app_name}-#{service_name}.conf", binding
       end
-      write_template 'upstart/service', "debian/etc/init/#{app_name}-#{service_name}.conf", binding
     end
 
     write_template 'upstart/passenger', "debian/etc/init/#{app_name}-passenger.conf"
