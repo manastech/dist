@@ -61,6 +61,8 @@ class Dist::Builder
       end
       write_template 'upstart/service', "debian/etc/init/#{app_name}-#{service_name}.conf", binding
     end
+
+    write_template 'upstart/passenger', "debian/etc/init/#{app_name}-passenger.conf"
   end
 
   def export_control
