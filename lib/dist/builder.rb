@@ -60,8 +60,6 @@ class Dist::Builder
       procfile = YAML.load_file 'Procfile'
       rm_f 'debian/etc/init/*'
 
-      write_template 'upstart/main', "debian/etc/init/#{app_name}.conf"
-
       procfile.each do |service_name, service_command|
         next if service_name == 'web'
         if service_command =~ /\Abundle\s+exec\s+(.*)/
@@ -71,6 +69,7 @@ class Dist::Builder
       end
     end
 
+    write_template 'upstart/main', "debian/etc/init/#{app_name}.conf"
     write_template 'upstart/passenger', "debian/etc/init/#{app_name}-passenger.conf"
   end
 
