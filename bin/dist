@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
 require 'dist'
 
-Dist::Builder.new.build
+builder = Dist::Builder.new
+
+if ARGV == ['init']
+  builder.init
+else
+  builder.build
+end

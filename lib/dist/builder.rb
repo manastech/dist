@@ -17,6 +17,12 @@ class Dist::Builder
     build_package
   end
 
+  def init
+   @app_name = File.basename(FileUtils.pwd)
+
+   write_template 'config', 'config/dist.rb'
+  end
+
   private
 
   def compile_assets
@@ -31,6 +37,7 @@ class Dist::Builder
       debian/DEBIAN
       debian/etc/init
       debian/usr/share/#{app_name}
+      debian/usr/share/#{app_name}/vendor
       debian/var/log/#{app_name}
       debian/var/lib/#{app_name}/bundle
       debian/var/lib/#{app_name}/gems
@@ -39,7 +46,7 @@ class Dist::Builder
 
     dirs.each { |dir| mkdir_p dir }
 
-    files = %w[app config config.ru db Gemfile Gemfile.lock lib plugins public Rakefile script vendor]
+    files = Dir['*'] - %w(debian log tmp test spec)
     files.each { |file| cp_r file, "debian/usr/share/#{app_name}" }
 
     ln_s "/var/lib/#{app_name}/bundle", "debian/usr/share/#{app_name}/vendor/bundle"
@@ -86,7 +93,8 @@ class Dist::Builder
   def config
     @config ||=
       Dist::Configuration.new.tap do |config|
-        config.instance_eval File.read("config/dist.rb")
+        file_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
+        config.instance_eval file_contents
       end
   end
 
@@ -116,5 +124,10 @@ class Dist::Builder
 
   def template(file)
     File.read(File.expand_path("../../templates/#{file}.erb", __FILE__))
+  end
+
+  def error(error_string)
+    puts "Error: #{error_string}"
+    exit 1
   end
 end
