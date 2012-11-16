@@ -1,24 +1,33 @@
 # Dist
 
-TODO: Write a gem description
+Generate packages to distribute Rails applications
 
 ## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'dist'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
 
     $ gem install dist
 
 ## Usage
 
-TODO: Write usage instructions here
+In your Rails root, run:
+
+    $ dist
+
+If it's the first time you run it, it will prompt you to run:
+
+    $ dist init
+
+This will create a `config/dist.rb` file that contains some information about how to create the package.
+
+A typical `config/dist.rb` file looks like this:
+
+    set :application, 'myrailsapp'
+    set :version, '1.0'
+    set :maintainer, 'John oe <john@doe.com>'
+    set :description, 'My awesome Rails app'
+    set :summary, 'Demonstrates the usage of dist'
+
+    use :mysql
+    use :mail
 
 ## Contributing
 
