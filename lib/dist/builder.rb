@@ -5,6 +5,8 @@ require 'yaml'
 class Dist::Builder
   include FileUtils
 
+  OutputDir = "tmp/dist/"
+
   def initialize
     @templates = {}
   end
@@ -33,57 +35,57 @@ class Dist::Builder
     rmtree 'debian'
 
     dirs = %W[
-      debian/DEBIAN
-      debian/etc/init
-      debian/usr/share/#{app_name}
-      debian/usr/share/#{app_name}/vendor
-      debian/var/log/#{app_name}
-      debian/var/lib/#{app_name}/bundle
-      debian/var/lib/#{app_name}/gems
-      debian/var/lib/#{app_name}/tmp
+      DEBIAN
+      etc/init
+      usr/share/#{app_name}
+      usr/share/#{app_name}/vendor
+      var/log/#{app_name}
+      var/lib/#{app_name}/bundle
+      var/lib/#{app_name}/gems
+      var/lib/#{app_name}/tmp
     ]
 
-    dirs.each { |dir| mkdir_p dir }
+    dirs.each { |dir| mkdir_p "#{OutputDir}#{dir}" }
 
     files = Dir['*'] - %w(debian log tmp test spec)
-    files.each { |file| cp_r file, "debian/usr/share/#{app_name}" }
+    files.each { |file| cp_r file, "#{OutputDir}usr/share/#{app_name}" }
 
-    ln_s "/var/lib/#{app_name}/bundle", "debian/usr/share/#{app_name}/vendor/bundle"
-    ln_s "/var/lib/#{app_name}/gems", "debian/usr/share/#{app_name}/.gems"
-    ln_s "/var/lib/#{app_name}/tmp", "debian/usr/share/#{app_name}/tmp"
-    ln_s "/var/log/#{app_name}", "debian/usr/share/#{app_name}/log"
+    ln_s "/var/lib/#{app_name}/bundle", "#{OutputDir}usr/share/#{app_name}/vendor/bundle"
+    ln_s "/var/lib/#{app_name}/gems", "#{OutputDir}usr/share/#{app_name}/.gems"
+    ln_s "/var/lib/#{app_name}/tmp", "#{OutputDir}usr/share/#{app_name}/tmp"
+    ln_s "/var/log/#{app_name}", "#{OutputDir}usr/share/#{app_name}/log"
   end
 
   def export_services
     if File.exists? 'Procfile'
       procfile = YAML.load_file 'Procfile'
-      rm_f 'debian/etc/init/*'
+      rm_f "#{OutputDir}etc/init/*"
 
       procfile.each do |service_name, service_command|
         next if service_name == 'web'
         if service_command =~ /\Abundle\s+exec\s+(.*)/
           service_command = $1
         end
-        write_template 'upstart/service', "debian/etc/init/#{app_name}-#{service_name}.conf", binding
+        write_template 'upstart/service', "#{OutputDir}etc/init/#{app_name}-#{service_name}.conf", binding
       end
     end
 
-    write_template 'upstart/main', "debian/etc/init/#{app_name}.conf"
-    write_template 'upstart/passenger', "debian/etc/init/#{app_name}-passenger.conf"
+    write_template 'upstart/main', "#{OutputDir}etc/init/#{app_name}.conf"
+    write_template 'upstart/passenger', "#{OutputDir}etc/init/#{app_name}-passenger.conf"
   end
 
   def export_control
     %w(control postinst prerm postrm config templates).each do |control_file|
-      write_template "debian/#{control_file}", "debian/DEBIAN/#{control_file}"
+      write_template "debian/#{control_file}", "#{OutputDir}DEBIAN/#{control_file}"
     end
 
     %w(postinst prerm postrm config).each do |control_file|
-      chmod '+x', "debian/DEBIAN/#{control_file}"
+      chmod '+x', "#{OutputDir}DEBIAN/#{control_file}"
     end
   end
 
   def build_package
-    `fakeroot dpkg-deb --build debian #{app_name}_#{config.version}.deb`
+    `fakeroot dpkg-deb --build #{OutputDir} #{app_name}_#{config.version}.deb`
   end
 
   def app_name
