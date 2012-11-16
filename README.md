@@ -22,7 +22,7 @@ A typical `config/dist.rb` file looks like this:
 
     set :application, 'myrailsapp'
     set :version, '1.0'
-    set :maintainer, 'John oe <john@doe.com>'
+    set :maintainer, 'John Doe <john@doe.com>'
     set :description, 'My awesome Rails app'
     set :summary, 'Demonstrates the usage of dist'
 
