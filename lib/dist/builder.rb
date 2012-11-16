@@ -8,6 +8,7 @@ class Dist::Builder
   OutputDir = "tmp/dist/"
 
   attr_reader :config
+  attr_reader :packages
 
   def initialize
     @templates = {}
@@ -101,10 +102,6 @@ class Dist::Builder
       file_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
       config.instance_eval file_contents
     end
-  end
-
-  def packages
-    @packages
   end
 
   def compute_packages
