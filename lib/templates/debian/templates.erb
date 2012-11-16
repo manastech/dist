@@ -2,3 +2,13 @@ Template: <%= app_name %>/http_port
 Type: string
 Default: 80
 Description: TCP Port for web application
+
+<% config.sections.each do |section| %>
+<% section.properties.each do |property, options| %>
+Template: <%= app_name %>/<%= section.name %>/<%= property %>
+Type: <%= options[:type] %>
+Default: <%= options[:default] %>
+Description: <%= section.name %> <%= property %>
+
+<% end %>
+<% end %>

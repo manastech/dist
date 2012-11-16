@@ -7,16 +7,44 @@ case "$1" in
     db_get <%= app_name %>/http_port && http_port="$RET"
     echo "HTTP_PORT=$http_port" > /etc/default/<%= app_name %>
 
-    cd /usr/share/<%= app_name %>
+<% i = 0 %>
+<% config.sections.each do |section| %>
+<% section.properties.each do |property, options| %>
+    db_get <%= app_name %>/<%= section.name %>/<%= property %> && property<%= i %>="$RET"
+<% i += 1 %>
+<% end %>
+<% end %>
+
+    tmpfile=`mktemp`
+    cat << EOF > $tmpfile
+require 'yaml'
+
+<% i = 0 %>
+<% config.sections.each do |section| %>
+yaml = YAML.load_file '<%= app_root %>/config/<%= section.name %>.yml'
+hash = yaml['production'] || yaml
+<% section.properties.each do |property, options| %>
+hash['<%= property %>'] = ARGV[<%= i %>]
+<% i += 1 %>
+<% end %>
+File.open('<%= app_root %>/config/<%= section.name %>.yml', 'w') do |file|
+  YAML.dump yaml, file
+end
+<% end %>
+EOF
+    ruby1.9.1 $tmpfile <%= (0 ... i).map { |n| "$property#{n}" }.join ' ' %>
+    rm $tmpfile
+
+    cd <%= app_root %>
     export RAILS_ENV=production
-    export GEM_HOME=/usr/share/<%= app_name %>/.gems
+    export GEM_HOME=<%= app_root %>/.gems
     export GEM_PATH=
 
     gem1.9.1 install bundler --no-ri --no-rdoc
     gem1.9.1 install rake -v=0.9.2.2 --no-ri --no-rdoc
     gem1.9.1 install passenger --no-ri --no-rdoc
 
-    BUNDLE=/usr/share/<%= app_name %>/.gems/bin/bundle
+    BUNDLE=<%= app_root %>/.gems/bin/bundle
 
     $BUNDLE install --deployment --without=development test assets
     $BUNDLE clean

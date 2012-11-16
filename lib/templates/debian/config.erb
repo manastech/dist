@@ -2,4 +2,9 @@
 . /usr/share/debconf/confmodule
 
 db_input high <%= app_name %>/http_port
+<% config.sections.each do |section| %>
+<% section.properties.each do |property, options| %>
+db_input high <%= app_name %>/<%= section.name %>/<%= property %>
+<% end %>
+<% end %>
 db_go

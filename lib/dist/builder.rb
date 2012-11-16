@@ -5,7 +5,7 @@ require 'yaml'
 class Dist::Builder
   include FileUtils::Verbose
 
-  OutputDir = "tmp/dist/"
+  OutputDir = "tmp/dist"
 
   attr_reader :config
   attr_reader :packages
@@ -43,50 +43,50 @@ class Dist::Builder
     dirs = %W[
       DEBIAN
       etc/init
-      usr/share/#{app_name}
-      usr/share/#{app_name}/vendor
+      #{app_root}
+      #{app_root}/vendor
       var/log/#{app_name}
       var/lib/#{app_name}/bundle
       var/lib/#{app_name}/gems
       var/lib/#{app_name}/tmp
     ]
 
-    dirs.each { |dir| mkdir_p "#{OutputDir}#{dir}" }
+    dirs.each { |dir| mkdir_p "#{OutputDir}/#{dir}" }
 
-    files = Dir['*'] - %w(debian log tmp test spec)
-    files.each { |file| cp_r file, "#{OutputDir}usr/share/#{app_name}" }
+    files = Dir['*'] - %w(log tmp test spec)
+    files.each { |file| cp_r file, "#{OutputDir}/#{app_root}" }
 
-    ln_s "/var/lib/#{app_name}/bundle", "#{OutputDir}usr/share/#{app_name}/vendor/bundle"
-    ln_s "/var/lib/#{app_name}/gems", "#{OutputDir}usr/share/#{app_name}/.gems"
-    ln_s "/var/lib/#{app_name}/tmp", "#{OutputDir}usr/share/#{app_name}/tmp"
-    ln_s "/var/log/#{app_name}", "#{OutputDir}usr/share/#{app_name}/log"
+    ln_s "/var/lib/#{app_name}/bundle", "#{OutputDir}/#{app_root}/vendor/bundle"
+    ln_s "/var/lib/#{app_name}/gems", "#{OutputDir}/#{app_root}/.gems"
+    ln_s "/var/lib/#{app_name}/tmp", "#{OutputDir}/#{app_root}/tmp"
+    ln_s "/var/log/#{app_name}", "#{OutputDir}/#{app_root}/log"
   end
 
   def export_services
     if File.exists? 'Procfile'
       procfile = YAML.load_file 'Procfile'
-      rm_f "#{OutputDir}etc/init/*"
+      rm_f "#{OutputDir}/etc/init/*"
 
       procfile.each do |service_name, service_command|
         next if service_name == 'web'
         if service_command =~ /\Abundle\s+exec\s+(.*)/
           service_command = $1
         end
-        write_template 'upstart/service', "#{OutputDir}etc/init/#{app_name}-#{service_name}.conf", binding
+        write_template 'upstart/service', "#{OutputDir}/etc/init/#{app_name}-#{service_name}.conf", binding
       end
     end
 
-    write_template 'upstart/main', "#{OutputDir}etc/init/#{app_name}.conf"
-    write_template 'upstart/passenger', "#{OutputDir}etc/init/#{app_name}-passenger.conf"
+    write_template 'upstart/main', "#{OutputDir}/etc/init/#{app_name}.conf"
+    write_template 'upstart/passenger', "#{OutputDir}/etc/init/#{app_name}-passenger.conf"
   end
 
   def export_control
     %w(control postinst prerm postrm config templates).each do |control_file|
-      write_template "debian/#{control_file}", "#{OutputDir}DEBIAN/#{control_file}"
+      write_template "debian/#{control_file}", "#{OutputDir}/DEBIAN/#{control_file}"
     end
 
     %w(postinst prerm postrm config).each do |control_file|
-      chmod 0755, "#{OutputDir}DEBIAN/#{control_file}"
+      chmod 0755, "#{OutputDir}/DEBIAN/#{control_file}"
     end
   end
 
@@ -98,11 +98,16 @@ class Dist::Builder
     @app_name ||= config.application
   end
 
+  def app_root
+    "/usr/share/#{app_name}"
+  end
+
   def load_configuration
-    @config = Dist::Configuration.new.tap do |config|
-      file_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
-      config.instance_eval file_contents
-    end
+    config_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
+
+    @config = Dist::Configuration.new
+    @config.instance_eval config_contents
+    @config
   end
 
   def compute_packages
@@ -121,7 +126,7 @@ class Dist::Builder
   end
 
   def write_template(source, target, binding_object = binding)
-    template = @templates[source] ||= ERB.new(template source)
+    template = @templates[source] ||= ERB.new(template(source), nil, '<>')
     File.open(target, 'w') { |f| f.write template.result(binding_object) }
   end
 
