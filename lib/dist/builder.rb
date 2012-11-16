@@ -32,7 +32,7 @@ class Dist::Builder
   end
 
   def build_output
-    rmtree 'debian'
+    rmtree OutputDir
 
     dirs = %W[
       DEBIAN
