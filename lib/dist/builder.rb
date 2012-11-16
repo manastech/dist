@@ -3,15 +3,19 @@ require 'fileutils'
 require 'yaml'
 
 class Dist::Builder
-  include FileUtils
+  include FileUtils::Verbose
 
   OutputDir = "tmp/dist/"
+
+  attr_reader :config
 
   def initialize
     @templates = {}
   end
 
   def build
+    load_configuration
+    compute_packages
     compile_assets
     build_output
     export_services
@@ -80,7 +84,7 @@ class Dist::Builder
     end
 
     %w(postinst prerm postrm config).each do |control_file|
-      chmod '+x', "#{OutputDir}DEBIAN/#{control_file}"
+      chmod 0755, "#{OutputDir}DEBIAN/#{control_file}"
     end
   end
 
@@ -92,31 +96,30 @@ class Dist::Builder
     @app_name ||= config.application
   end
 
-  def config
-    @config ||=
-      Dist::Configuration.new.tap do |config|
-        file_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
-        config.instance_eval file_contents
-      end
+  def load_configuration
+    @config = Dist::Configuration.new.tap do |config|
+      file_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
+      config.instance_eval file_contents
+    end
   end
 
   def packages
-    @packages ||= compute_packages
+    @packages
   end
 
   def compute_packages
     dependencies_yml = YAML.load_file File.expand_path('../../dependencies.yml', __FILE__)
-    packages = dependencies_yml['default']
+    @packages = dependencies_yml['default']
 
     config.dependencies.each do |dependency|
       dependency_packages = dependencies_yml[dependency.to_s]
       if dependency_packages
-        packages.concat dependency_packages
+        @packages.concat dependency_packages
       else
         raise "Could not find packages for dependency: #{dependency}"
       end
     end
-    packages
+    @packages
   end
 
   def write_template(source, target, binding_object = binding)
