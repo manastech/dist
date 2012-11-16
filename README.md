@@ -26,7 +26,6 @@ A typical `config/dist.rb` file looks like this:
     set :description, 'My awesome Rails app'
     set :summary, 'Demonstrates the usage of dist'
 
-    use :mysql
     use :mail
 
 ## Contributing
