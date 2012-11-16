@@ -1,0 +1,13 @@
+amqp:
+  - rabbitmq
+mysql:
+  - mysql
+mysql2:
+  - mysql
+nokogiri:
+  - libxml2
+  - libxslt
+resque:
+  - redis
+tire:
+  - elasticsearch

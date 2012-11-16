@@ -4,12 +4,18 @@ default:
   - build-essential
   - libcurl4-openssl-dev
   - libssl-dev
+elasticsearch:
+  - elasticsearch
+libxml2:
+  - libxml2-dev
+libxslt:
+  - libxslt-dev
+mail:
+  - mail-transport-agent
 mysql:
   - mysql-server
   - libmysqlclient-dev
+rabbitmq:
+  - rabbitmq-server
 redis:
   - redis-server
-mail:
-  - mail-transport-agent
-elasticsearch:
-  - elasticsearch

@@ -1,6 +1,8 @@
+require 'bundler/setup'
 require 'erb'
 require 'fileutils'
 require 'yaml'
+require 'set'
 
 class Dist::Builder
   include FileUtils::Verbose
@@ -111,18 +113,37 @@ class Dist::Builder
   end
 
   def compute_packages
-    dependencies_yml = YAML.load_file File.expand_path('../../dependencies.yml', __FILE__)
-    @packages = dependencies_yml['default']
+    dependencies = Set.new(config.dependencies)
+    add_dependencies_from_bundle dependencies
+    compute_packages_from_dependencies dependencies
+  end
 
-    config.dependencies.each do |dependency|
+  def add_dependencies_from_bundle(dependencies)
+    gems_yml = YAML.load_file File.expand_path('../../gems.yml', __FILE__)
+    Bundler.load.specs.each do |spec|
+      gem_depenencies = gems_yml[spec.name]
+      if gem_depenencies
+        gem_depenencies.each do |dependency|
+          dependencies << dependency
+        end
+      end
+    end
+  end
+
+  def compute_packages_from_dependencies(dependencies)
+    dependencies_yml = YAML.load_file File.expand_path('../../dependencies.yml', __FILE__)
+    @packages = Set.new(dependencies_yml['default'])
+    dependencies.each do |dependency|
       dependency_packages = dependencies_yml[dependency.to_s]
       if dependency_packages
-        @packages.concat dependency_packages
+        dependency_packages.each do |package|
+          @packages << package
+        end
       else
         raise "Could not find packages for dependency: #{dependency}"
       end
     end
-    @packages
+    @packages = @packages.to_a
   end
 
   def write_template(source, target, binding_object = binding)
