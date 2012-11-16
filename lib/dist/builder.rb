@@ -10,14 +10,15 @@ class Dist::Builder
   attr_reader :config
   attr_reader :packages
 
-  def initialize
+  def initialize(options = {})
     @templates = {}
+    @options = options
   end
 
   def build
     load_configuration
     compute_packages
-    compile_assets
+    compile_assets unless @options[:skip_assets]
     build_output
     export_services
     export_control

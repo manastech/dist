@@ -1,7 +1,21 @@
 #!/usr/bin/env ruby
 require 'dist'
+require 'optparse'
 
-builder = Dist::Builder.new
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: dist [switches] [command]"
+
+  opts.on('--skip-assets', 'Skip assets precompilation') do
+    options[:skip_assets] = true
+  end
+  opts.on("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
+
+builder = Dist::Builder.new options
 
 if ARGV == ['init']
   builder.init
