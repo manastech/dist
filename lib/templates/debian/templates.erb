@@ -4,11 +4,11 @@ Default: 80
 Description: TCP Port for web application
 
 <% config.sections.each do |section| %>
-<% section.properties.each do |property, options| %>
-Template: <%= app_name %>/<%= section.name %>/<%= property %>
-Type: <%= options[:type] %>
-Default: <%= options[:default] %>
-Description: <%= section.name %> <%= property %>
+<% section.properties.each do |property| %>
+Template: <%= app_name %>/<%= property.full_name %>
+Type: <%= property.type %>
+Default: <%= property.default_value %>
+Description: <%= property.prompt %>
 
 <% end %>
 <% end %>

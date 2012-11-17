@@ -40,11 +40,35 @@ class Dist::Configuration
 
     def initialize(name)
       @name = name
-      @properties = {}
+      @properties = []
     end
 
     def string(name, options = {})
-      @properties[name] = options.merge type: :string
+      @properties << Property.new(self, name, :string, options)
+    end
+  end
+
+  class Property
+    attr_reader :name
+    attr_reader :type
+
+    def initialize(section, name, type, options = {})
+      @section = section
+      @name = name
+      @type = type
+      @options = options
+    end
+
+    def full_name
+      "#{@section.name}/#{name}"
+    end
+
+    def default_value
+      @options[:default]
+    end
+
+    def prompt
+      @options[:prompt] || "#{@section.name} #{name}"
     end
   end
 end

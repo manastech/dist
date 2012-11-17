@@ -9,8 +9,8 @@ case "$1" in
 
 <% i = 0 %>
 <% config.sections.each do |section| %>
-<% section.properties.each do |property, options| %>
-    db_get <%= app_name %>/<%= section.name %>/<%= property %> && property<%= i %>="$RET"
+<% section.properties.each do |property| %>
+    db_get <%= app_name %>/<%= property.full_name %> && property<%= i %>="$RET"
 <% i += 1 %>
 <% end %>
 <% end %>
@@ -23,8 +23,8 @@ require 'yaml'
 <% config.sections.each do |section| %>
 yaml = YAML.load_file '<%= app_root %>/config/<%= section.name %>.yml'
 hash = yaml['production'] || yaml
-<% section.properties.each do |property, options| %>
-hash['<%= property %>'] = ARGV[<%= i %>]
+<% section.properties.each do |property| %>
+hash['<%= property.name %>'] = ARGV[<%= i %>]
 <% i += 1 %>
 <% end %>
 File.open('<%= app_root %>/config/<%= section.name %>.yml', 'w') do |file|

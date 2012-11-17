@@ -3,8 +3,8 @@
 
 db_input high <%= app_name %>/http_port
 <% config.sections.each do |section| %>
-<% section.properties.each do |property, options| %>
-db_input high <%= app_name %>/<%= section.name %>/<%= property %>
+<% section.properties.each do |property| %>
+db_input high <%= app_name %>/<%= property.full_name %>
 <% end %>
 <% end %>
 db_go
