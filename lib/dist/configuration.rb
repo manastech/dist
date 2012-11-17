@@ -35,15 +35,29 @@ class Dist::Configuration
   end
 
   class Section
+    include Dist::Error
+
     attr_reader :name
     attr_reader :properties
 
     def initialize(name)
       @name = name
       @properties = []
+
+      @filename = "config/#{name}.yml"
+      unless File.exists?(@filename)
+        error "can't 'config :#{name}' because the file '#{@filename}' doesn't exist"
+      end
+
+      @yaml = YAML.load_file @filename
+      @yaml = @yaml['production'] || @yaml
     end
 
     def string(name, options = {})
+      unless @yaml.has_key?(name.to_s)
+        error "can't 'string: :#{name}' in 'config: #{@name}' because the property '#{name}' inside the file '#{@filename} doesn't exist"
+      end
+
       @properties << Property.new(self, name, :string, options)
     end
   end
