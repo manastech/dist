@@ -29,7 +29,7 @@ class Dist::YamlLoader
       error "fetching '#{uri}' got status code #{response.code}. You can try running dist with --local if the problem persists."
     end
     YAML.load response.body
-  rescue SocketError
-    error "couldn't fetch '#{uri}'. You can try running dist --local if you don't have internet access."
+  rescue SocketError => ex
+    error "couldn't fetch '#{uri}'. You can try running dist --local if you don't have internet access.\n(Exception is: #{ex.message})"
   end
 end
