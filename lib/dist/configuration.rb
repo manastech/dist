@@ -54,11 +54,15 @@ class Dist::Configuration
     end
 
     def string(name, options = {})
+      add_property name, :string, options
+    end
+
+    def add_property(name, type, options = {})
       unless @yaml.has_key?(name.to_s)
-        error "can't 'string: :#{name}' in 'config: #{@name}' because the property '#{name}' inside the file '#{@filename} doesn't exist"
+        error "can't '#{type}: :#{name}' in 'config: #{@name}' because the property '#{name}' inside the file '#{@filename} doesn't exist"
       end
 
-      @properties << Property.new(self, name, :string, options)
+      @properties << Property.new(self, name, type, options)
     end
   end
 
