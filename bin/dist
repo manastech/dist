@@ -9,6 +9,11 @@ OptionParser.new do |opts|
   opts.on('--skip-assets', 'Skip assets precompilation') do
     options[:skip_assets] = true
   end
+
+  opts.on('--local', 'Load gem dependencies and dependency packages definitions from local dist gem') do
+    options[:local] = true
+  end
+
   opts.on("-h", "--help", "Show this message") do
     puts opts
     exit

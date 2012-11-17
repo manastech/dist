@@ -5,6 +5,7 @@ require 'yaml'
 require 'set'
 
 class Dist::Builder
+  include Dist::Error
   include FileUtils::Verbose
 
   OutputDir = "tmp/dist"
@@ -14,6 +15,7 @@ class Dist::Builder
 
   def initialize(options = {})
     @templates = {}
+    @yaml_loader = Dist::YamlLoader.new options
     @options = options
   end
 
@@ -105,11 +107,7 @@ class Dist::Builder
   end
 
   def load_configuration
-    config_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
-
     @config = Dist::Configuration.new
-    @config.instance_eval config_contents
-    @config
   end
 
   def compute_packages
@@ -119,7 +117,7 @@ class Dist::Builder
   end
 
   def add_dependencies_from_bundle(dependencies)
-    gems_yml = YAML.load_file File.expand_path('../../gems.yml', __FILE__)
+    gems_yml = @yaml_loader.load 'gems'
     Bundler.load.specs.each do |spec|
       gem_depenencies = gems_yml[spec.name]
       if gem_depenencies
@@ -131,7 +129,7 @@ class Dist::Builder
   end
 
   def compute_packages_from_dependencies(dependencies)
-    dependencies_yml = YAML.load_file File.expand_path('../../dependencies.yml', __FILE__)
+    dependencies_yml = @yaml_loader.load 'dependencies'
     @packages = Set.new(dependencies_yml['default'])
     dependencies.each do |dependency|
       dependency_packages = dependencies_yml[dependency.to_s]
@@ -153,10 +151,5 @@ class Dist::Builder
 
   def template(file)
     File.read(File.expand_path("../../templates/#{file}.erb", __FILE__))
-  end
-
-  def error(error_string)
-    puts "Error: #{error_string}"
-    exit 1
   end
 end

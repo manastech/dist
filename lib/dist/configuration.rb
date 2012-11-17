@@ -1,4 +1,6 @@
 class Dist::Configuration
+  include Dist::Error
+
   attr_reader :dependencies
   attr_reader :sections
 
@@ -6,6 +8,9 @@ class Dist::Configuration
     @vars = {}
     @dependencies = []
     @sections = []
+
+    config_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
+    instance_eval config_contents
   end
 
   def set(name, value)
