@@ -9,7 +9,7 @@ class Dist::Configuration
     @dependencies = []
     @sections = []
 
-    config_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`")
+    config_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`.")
     instance_eval config_contents
   end
 
@@ -46,7 +46,7 @@ class Dist::Configuration
 
       @filename = "config/#{name}.yml"
       unless File.exists?(@filename)
-        error "can't 'config :#{name}' because the file '#{@filename}' doesn't exist"
+        error_at "config :#{name}", "the file '#{@filename}' doesn't exist."
       end
 
       @yaml = YAML.load_file @filename
@@ -59,7 +59,7 @@ class Dist::Configuration
 
     def add_property(name, type, options = {})
       unless @yaml.has_key?(name.to_s)
-        error "can't '#{type}: :#{name}' in 'config: #{@name}' because the property '#{name}' inside the file '#{@filename} doesn't exist"
+        error_at "#{type}: :#{name}", "the property '#{name}' inside the file '#{@filename} doesn't exist."
       end
 
       @properties << Property.new(self, name, type, options)

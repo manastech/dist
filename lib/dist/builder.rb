@@ -138,7 +138,7 @@ class Dist::Builder
           @packages << package
         end
       else
-        raise "Could not find packages for dependency: #{dependency}"
+        error_at "use :#{dependency}", "could not find packages for dependency '#{dependency}'."
       end
     end
     @packages = @packages.to_a
