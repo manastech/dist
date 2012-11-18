@@ -38,7 +38,7 @@ class Dist::Builder
   private
 
   def compile_assets
-    `bundle exec rake assets:clean assets:precompile`
+    exec 'bundle exec rake assets:clean assets:precompile'
   end
 
   def build_output
@@ -95,7 +95,7 @@ class Dist::Builder
   end
 
   def build_package
-    `fakeroot dpkg-deb --build #{OutputDir} #{app_name}_#{config.version}.deb`
+    exec "fakeroot dpkg-deb --build #{OutputDir} #{app_name}_#{config.version}.deb"
   end
 
   def app_name
@@ -103,7 +103,7 @@ class Dist::Builder
   end
 
   def app_root
-    "/usr/share/#{app_name}"
+    @app_root = "/usr/share/#{app_name}"
   end
 
   def load_configuration
@@ -111,45 +111,87 @@ class Dist::Builder
   end
 
   def compute_packages
-    dependencies = Set.new(config.dependencies)
-    add_dependencies_from_bundle dependencies
-    compute_packages_from_dependencies dependencies
+    puts "computing packages:"
+    @gems_yml = @yaml_loader.load 'gems'
+    @dependencies_yml = @yaml_loader.load 'dependencies'
+    @dependencies = Set.new
+    @packages = Set.new
+    @indent = 1
+    add_default_dependencies
+    add_dependencies_from_use
+    add_dependencies_from_bundle
+    @packages = @packages.to_a
   end
 
-  def add_dependencies_from_bundle(dependencies)
-    gems_yml = @yaml_loader.load 'gems'
+  def add_default_dependencies
+    add_packages_from_dependency('default')
+  end
+
+  def add_dependencies_from_use
+    config.dependencies.each do |dependency|
+      if @dependencies.add?(dependency)
+        add_packages_from_dependency(dependency)
+      end
+    end
+  end
+
+  def add_dependencies_from_bundle
     Bundler.load.specs.each do |spec|
-      gem_depenencies = gems_yml[spec.name]
+      gem_depenencies = @gems_yml[spec.name]
       if gem_depenencies
+        printed_gem = false
         gem_depenencies.each do |dependency|
-          dependencies << dependency
+          if @dependencies.add?(dependency)
+            unless printed_gem
+              puts_with_indent "gem :#{spec.name}"
+              printed_gem = true
+            end
+            with_indent do
+              add_packages_from_dependency(dependency)
+            end
+          end
         end
       end
     end
   end
 
-  def compute_packages_from_dependencies(dependencies)
-    dependencies_yml = @yaml_loader.load 'dependencies'
-    @packages = Set.new(dependencies_yml['default'])
-    dependencies.each do |dependency|
-      dependency_packages = dependencies_yml[dependency.to_s]
+  def add_packages_from_dependency(dependency)
+    puts_with_indent "use :#{dependency}"
+    with_indent do
+      dependency_packages = @dependencies_yml[dependency.to_s]
       if dependency_packages
         dependency_packages.each do |package|
+          puts_with_indent "package :#{package}"
           @packages << package
         end
       else
         error_at "use :#{dependency}", "could not find packages for dependency '#{dependency}'."
       end
     end
-    @packages = @packages.to_a
   end
 
   def write_template(source, target, binding_object = binding)
     template = @templates[source] ||= ERB.new(template(source), nil, '<>')
+    puts "write #{target} from template #{source}"
     File.open(target, 'w') { |f| f.write template.result(binding_object) }
   end
 
   def template(file)
     File.read(File.expand_path("../../templates/#{file}.erb", __FILE__))
+  end
+
+  def exec(*args)
+    puts *args
+    Kernel::exec *args
+  end
+
+  def puts_with_indent(string)
+    puts "#{'  ' * @indent}#{string}"
+  end
+
+  def with_indent
+    @indent += 1
+    yield
+    @indent -= 1
   end
 end
