@@ -64,6 +64,10 @@ class Dist::Configuration
 
       @properties << Property.new(self, name, type, options)
     end
+
+    def to_s
+      name.to_s
+    end
   end
 
   class Property

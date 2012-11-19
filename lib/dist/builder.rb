@@ -23,6 +23,7 @@ class Dist::Builder
     compute_packages
     compile_assets if !@options[:skip_assets] && assets_enabled
     build_output
+    move_config_files
     generate_logrotate
     export_services
     export_control
@@ -87,6 +88,13 @@ class Dist::Builder
     ln_s "/var/lib/#{app_name}/tmp", "#{OutputDir}/#{app_root}/tmp"
     ln_s "/var/log/#{app_name}", "#{OutputDir}/#{app_root}/log"
     ln_sf "/etc/#{app_name}/database.yml", "#{OutputDir}/#{app_root}/config/database.yml"
+  end
+
+  def move_config_files
+    config.sections.each do |section|
+      mv "#{OutputDir}/#{app_root}/config/#{section}.yml", "#{OutputDir}/etc/#{app_name}/"
+      ln_s "/etc/#{app_name}/#{section}.yml", "#{OutputDir}/#{app_root}/config/#{section}.yml"
+    end
   end
 
   def export_services

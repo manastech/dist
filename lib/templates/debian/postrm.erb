@@ -1,6 +1,7 @@
 #!/bin/sh
 
 if [ "$1" = purge ]; then
+  rm -f /etc/<%= app_name %>/database.yml
   rm -Rf /var/lib/<%= app_name %>/bundle/*
   rm -Rf /var/lib/<%= app_name %>/gems/*
   rm -Rf /var/lib/<%= app_name %>/tmp/*

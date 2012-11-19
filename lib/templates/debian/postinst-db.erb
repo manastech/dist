@@ -12,16 +12,18 @@ EOF
 
   cat << EOF > /etc/<%= app_name %>/database.yml
 production:
-adapter: mysql2
-encoding: utf8
-reconnect: true
-database: <%= app_name %>
-pool: 5
-username: <%= app_name %>
-password: $db_password
+  adapter: mysql2
+  encoding: utf8
+  reconnect: true
+  database: <%= app_name %>
+  pool: 5
+  username: <%= app_name %>
+  password: $db_password
 EOF
-  chmod 0640 /etc/<%= app_name %>/database.yml
 fi
+
+chmod 0640 /etc/<%= app_name %>/database.yml
+chown -R root:<%= app_name %> /etc/<%= app_name %>/database.yml
 
 # Get the current DB version to check if it actually exists
 $BUNDLE exec rake db:version
