@@ -6,5 +6,7 @@ chdir <%= app_root %>
 env GEM_HOME=<%= app_root %>/.gems
 env RAILS_ENV=production
 env HOME=<%= app_root %>
+setuid <%= app_name %>
+setgid <%= app_name %>
 
 exec .gems/bin/bundle exec <%= service_command %> >> /var/log/<%= app_name %>/<%= service_name %>.log 2>&1
