@@ -9,5 +9,5 @@ expect fork
 
 script
   . /etc/default/<%= app_name %>
-  .gems/bin/passenger start -e production -p $HTTP_PORT --user root
+  .gems/bin/passenger start -e production -p $HTTP_PORT --user <%= app_name %>
 end script

@@ -4,9 +4,11 @@
 
 case "$1" in
   configure)
+    # Configure HTTP port
     db_get <%= app_name %>/http_port && http_port="$RET"
     echo "HTTP_PORT=$http_port" > /etc/default/<%= app_name %>
 
+    # Fill YAML configuration files
 <% i = 0 %>
 <% config.sections.each do |section| %>
 <% section.properties.each do |property| %>
@@ -35,6 +37,7 @@ EOF
     ruby1.9.1 $tmpfile <%= (0 ... i).map { |n| "$property#{n}" }.join ' ' %>
     rm $tmpfile
 
+    # Configure database
     if [ ! -e /etc/<%= app_name %>/database.yml ]; then
       db_password=`ruby1.9.1 -e "print (0...16).map{ (('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a)[rand(62)] }.join"`
 
@@ -56,8 +59,35 @@ production:
   username: <%= app_name %>
   password: $db_password
 EOF
+      chmod 0640 /etc/<%= app_name %>/database.yml
     fi
 
+    # Create user and group for application and set permissions to some files and directories
+
+    if ! getent group <%= app_name %> >/dev/null; then
+      addgroup --system <%= app_name %> >/dev/null
+    fi
+
+    if ! getent passwd <%= app_name %> >/dev/null; then
+      adduser \
+        --system \
+        --disabled-login \
+        --ingroup <%= app_name %> \
+        --no-create-home \
+        --home /nonexistent \
+        --gecos "<%= app_name %>" \
+        --shell /bin/false \
+        <%= app_name %>  >/dev/null
+    fi
+    chmod 0775 /var/log/<%= app_name %>/
+    touch /var/log/<%= app_name %>/production.log
+    chmod 0664 /var/log/<%= app_name %>/production.log
+    chown -R root:<%= app_name %> /etc/<%= app_name %>/
+    chown -R root:<%= app_name %> /var/log/<%= app_name %>/
+    chown -R root:<%= app_name %> /var/lib/<%= app_name %>/tmp
+
+
+    # Install base gems and the application bundle
     cd <%= app_root %>
     export RAILS_ENV=production
     export GEM_HOME=<%= app_root %>/.gems
