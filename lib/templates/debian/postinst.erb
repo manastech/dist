@@ -35,6 +35,29 @@ EOF
     ruby1.9.1 $tmpfile <%= (0 ... i).map { |n| "$property#{n}" }.join ' ' %>
     rm $tmpfile
 
+    if [ ! -e /etc/<%= app_name %>/database.yml ]; then
+      db_password=`ruby1.9.1 -e "print (0...16).map{ (('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a)[rand(62)] }.join"`
+
+      tmpfile=`mktemp`
+      cat << EOF > $tmpfile
+CREATE DATABASE IF NOT EXISTS <%= app_name %>;
+GRANT ALL ON <%= app_name %>.* TO '<%= app_name %>'@'localhost' IDENTIFIED BY '$db_password';
+EOF
+      mysql --defaults-file=/etc/mysql/debian.cnf  < $tmpfile
+      rm $tmpfile
+
+      cat << EOF > /etc/<%= app_name %>/database.yml
+production:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: true
+  database: <%= app_name %>
+  pool: 5
+  username: <%= app_name %>
+  password: $db_password
+EOF
+    fi
+
     cd <%= app_root %>
     export RAILS_ENV=production
     export GEM_HOME=<%= app_root %>/.gems

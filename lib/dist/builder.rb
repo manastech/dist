@@ -46,6 +46,7 @@ class Dist::Builder
 
     dirs = %W[
       DEBIAN
+      etc/#{app_name}
       etc/init
       #{app_root}
       #{app_root}/vendor
@@ -64,6 +65,7 @@ class Dist::Builder
     ln_s "/var/lib/#{app_name}/gems", "#{OutputDir}/#{app_root}/.gems"
     ln_s "/var/lib/#{app_name}/tmp", "#{OutputDir}/#{app_root}/tmp"
     ln_s "/var/log/#{app_name}", "#{OutputDir}/#{app_root}/log"
+    ln_sf "/etc/#{app_name}/database.yml", "#{OutputDir}/#{app_root}/config/database.yml"
   end
 
   def export_services
