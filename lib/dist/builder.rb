@@ -15,15 +15,13 @@ class Dist::Builder
 
   def initialize(options = {})
     @templates = {}
-    @yaml_loader = Dist::YamlLoader.new options
     @options = options
   end
 
   def build
     load_configuration
     compute_packages
-    load_rails
-    compile_assets if assets_enabled && !@options[:skip_assets]
+    compile_assets if !@options[:skip_assets] && assets_enabled
     build_output
     export_services
     export_control
@@ -38,12 +36,21 @@ class Dist::Builder
 
   private
 
+  def rails
+    @rails ||= begin
+      puts "Loading Rails..."
+      require './config/boot'
+      require './config/application'
+      Rails
+    end
+  end
+
   def assets_enabled
-    @assets_enabled ||= Rails.configuration.assets.enabled rescue false
+    @assets_enabled ||= rails.configuration.assets.enabled rescue false
   end
 
   def compile_assets
-    exec 'bundle exec rake assets:clean assets:precompile'
+    system 'bundle exec rake assets:clean assets:precompile'
   end
 
   def build_output
@@ -102,7 +109,7 @@ class Dist::Builder
   end
 
   def build_package
-    exec "fakeroot dpkg-deb --build #{OutputDir} #{app_name}_#{config.version}.deb"
+    system "fakeroot dpkg-deb --build #{OutputDir} #{app_name}_#{config.version}.deb"
   end
 
   def app_name
@@ -117,70 +124,8 @@ class Dist::Builder
     @config = Dist::Configuration.new
   end
 
-  def load_rails
-    puts "Loading Rails..."
-    require './config/boot'
-    require './config/application'
-  end
-
   def compute_packages
-    puts "Computing packages..."
-    @gems_yml = @yaml_loader.load 'gems'
-    @dependencies_yml = @yaml_loader.load 'dependencies'
-    @dependencies = Set.new
-    @packages = Set.new
-    @indent = 1
-    add_default_dependencies
-    add_dependencies_from_use
-    add_dependencies_from_bundle
-    @packages = @packages.to_a
-  end
-
-  def add_default_dependencies
-    add_packages_from_dependency('default')
-  end
-
-  def add_dependencies_from_use
-    config.dependencies.each do |dependency|
-      if @dependencies.add?(dependency)
-        add_packages_from_dependency(dependency)
-      end
-    end
-  end
-
-  def add_dependencies_from_bundle
-    Bundler.load.specs.each do |spec|
-      gem_depenencies = @gems_yml[spec.name]
-      if gem_depenencies
-        printed_gem = false
-        gem_depenencies.each do |dependency|
-          if @dependencies.add?(dependency)
-            unless printed_gem
-              puts_with_indent "gem :#{spec.name}"
-              printed_gem = true
-            end
-            with_indent do
-              add_packages_from_dependency(dependency)
-            end
-          end
-        end
-      end
-    end
-  end
-
-  def add_packages_from_dependency(dependency)
-    puts_with_indent "use :#{dependency}"
-    with_indent do
-      dependency_packages = @dependencies_yml[dependency.to_s]
-      if dependency_packages
-        dependency_packages.each do |package|
-          puts_with_indent "package :#{package}"
-          @packages << package
-        end
-      else
-        error_at "use :#{dependency}", "could not find packages for dependency '#{dependency}'."
-      end
-    end
+    @packages = Dist::PackageComputer.new(@config, @options).packages
   end
 
   def write_template(source, target, binding_object = binding)
@@ -193,18 +138,8 @@ class Dist::Builder
     File.read(File.expand_path("../../templates/#{file}.erb", __FILE__))
   end
 
-  def exec(*args)
+  def system(*args)
     puts *args
-    Kernel::exec *args
-  end
-
-  def puts_with_indent(string)
-    puts "#{'  ' * @indent}#{string}"
-  end
-
-  def with_indent
-    @indent += 1
-    yield
-    @indent -= 1
+    Kernel::system *args
   end
 end
