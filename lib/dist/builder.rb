@@ -22,7 +22,8 @@ class Dist::Builder
   def build
     load_configuration
     compute_packages
-    compile_assets unless @options[:skip_assets]
+    load_rails
+    compile_assets if assets_enabled && !@options[:skip_assets]
     build_output
     export_services
     export_control
@@ -36,6 +37,10 @@ class Dist::Builder
   end
 
   private
+
+  def assets_enabled
+    @assets_enabled ||= Rails.configuration.assets.enabled rescue false
+  end
 
   def compile_assets
     exec 'bundle exec rake assets:clean assets:precompile'
@@ -112,8 +117,14 @@ class Dist::Builder
     @config = Dist::Configuration.new
   end
 
+  def load_rails
+    puts "Loading Rails..."
+    require './config/boot'
+    require './config/application'
+  end
+
   def compute_packages
-    puts "computing packages:"
+    puts "Computing packages..."
     @gems_yml = @yaml_loader.load 'gems'
     @dependencies_yml = @yaml_loader.load 'dependencies'
     @dependencies = Set.new
