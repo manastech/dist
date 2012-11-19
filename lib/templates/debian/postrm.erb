@@ -5,7 +5,7 @@ if [ "$1" = purge ]; then
   rm -Rf /var/lib/<%= app_name %>/gems/*
   rm -Rf /var/lib/<%= app_name %>/tmp/*
   rm -Rf /var/log/<%= app_name %>/*
-  rm -f <%= app_root %>/.bundle/config
+  rm -Rf <%= app_root %>/.bundle
   rm -f /etc/default/<%= app_name %>
 
   if [ -e /usr/share/debconf/confmodule ]; then

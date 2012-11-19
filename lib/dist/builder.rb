@@ -112,7 +112,7 @@ class Dist::Builder
   end
 
   def export_control
-    %w(control postinst prerm postrm config templates).each do |control_file|
+    %w(control postinst prerm postrm config templates conffiles).each do |control_file|
       write_template "debian/#{control_file}", "#{OutputDir}/DEBIAN/#{control_file}"
     end
 
