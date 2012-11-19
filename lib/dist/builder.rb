@@ -49,6 +49,13 @@ class Dist::Builder
     @assets_enabled ||= rails.configuration.assets.enabled rescue false
   end
 
+  def database_enabled
+    @database_enabled ||= begin
+      rails
+      defined? ActiveRecord
+    end
+  end
+
   def compile_assets
     system 'bundle exec rake assets:clean assets:precompile'
   end
