@@ -23,6 +23,7 @@ class Dist::Builder
     compute_packages
     compile_assets if !@options[:skip_assets] && assets_enabled
     build_output
+    generate_logrotate
     export_services
     export_control
     build_package
@@ -67,6 +68,7 @@ class Dist::Builder
       DEBIAN
       etc/#{app_name}
       etc/init
+      etc/logrotate.d
       #{app_root}
       #{app_root}/vendor
       var/log/#{app_name}
@@ -103,6 +105,10 @@ class Dist::Builder
 
     write_template 'upstart/main', "#{OutputDir}/etc/init/#{app_name}.conf"
     write_template 'upstart/passenger', "#{OutputDir}/etc/init/#{app_name}-passenger.conf"
+  end
+
+  def generate_logrotate
+    write_template 'logrotate', "#{OutputDir}/etc/logrotate.d/#{app_name}"
   end
 
   def export_control

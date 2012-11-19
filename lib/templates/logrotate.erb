@@ -1,0 +1,9 @@
+/var/log/<%= app_name %>/*.log {
+  daily
+  missingok
+  rotate 7
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+}
