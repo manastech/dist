@@ -50,8 +50,8 @@ class Dist::Builder
     @assets_enabled ||= rails.configuration.assets.enabled rescue false
   end
 
-  def database_enabled
-    @database_enabled ||= begin
+  def has_database?
+    @has_database ||= begin
       rails
       defined? ActiveRecord
     end
@@ -149,6 +149,11 @@ class Dist::Builder
 
   def template(file)
     File.read(File.expand_path("../../templates/#{file}.erb", __FILE__))
+  end
+
+  def render(file)
+    template = @templates[file] ||= ERB.new(template(file), nil, '<>')
+    template.result(binding)
   end
 
   def system(*args)
