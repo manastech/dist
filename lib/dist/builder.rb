@@ -99,21 +99,21 @@ class Dist::Builder
         if service_command =~ /\Abundle\s+exec\s+(.*)/
           service_command = $1
         end
-        write_template 'upstart/service', "#{OutputDir}/etc/init/#{app_name}-#{service_name}.conf", binding
+        write_output_template 'upstart/service', "/etc/init/#{app_name}-#{service_name}.conf", binding
       end
     end
 
-    write_template 'upstart/main', "#{OutputDir}/etc/init/#{app_name}.conf"
-    write_template 'upstart/passenger', "#{OutputDir}/etc/init/#{app_name}-passenger.conf"
+    write_output_template 'upstart/main', "/etc/init/#{app_name}.conf"
+    write_output_template 'upstart/passenger', "/etc/init/#{app_name}-passenger.conf"
   end
 
   def generate_logrotate
-    write_template 'logrotate', "#{OutputDir}/etc/logrotate.d/#{app_name}"
+    write_output_template 'logrotate', "/etc/logrotate.d/#{app_name}"
   end
 
   def export_control
-    %w(control postinst prerm postrm config templates conffiles).each do |control_file|
-      write_template "debian/#{control_file}", "#{OutputDir}/DEBIAN/#{control_file}"
+    %w(control postinst prerm postrm config templates).each do |control_file|
+      write_output_template "debian/#{control_file}", "/DEBIAN/#{control_file}"
     end
 
     %w(postinst prerm postrm config).each do |control_file|
@@ -145,6 +145,10 @@ class Dist::Builder
     template = @templates[source] ||= ERB.new(template(source), nil, '<>')
     puts "write #{target} from template #{source}"
     File.open(target, 'w') { |f| f.write template.result(binding_object) }
+  end
+
+  def write_output_template(source, target, binding_object = binding)
+    write_template source, "#{OutputDir}#{target}", binding_object
   end
 
   def template(file)
