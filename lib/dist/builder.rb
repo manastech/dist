@@ -64,6 +64,7 @@ class Dist::Builder
 
   def build_output
     rmtree OutputDir
+    rm_f output_filename
 
     dirs = %W[
       DEBIAN
@@ -130,7 +131,7 @@ class Dist::Builder
   end
 
   def build_package
-    system "fakeroot dpkg-deb --build #{OutputDir} #{app_name}_#{config.version}.deb"
+    system "fakeroot dpkg-deb --build #{OutputDir} #{output_filename}"
   end
 
   def app_name
@@ -138,7 +139,11 @@ class Dist::Builder
   end
 
   def app_root
-    @app_root = "/usr/share/#{app_name}"
+    @app_root ||= "/usr/share/#{app_name}"
+  end
+
+  def output_filename
+    @output_filename ||= "#{app_name}_#{config.version}.deb"
   end
 
   def load_configuration
