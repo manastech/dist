@@ -156,6 +156,10 @@ class Dist::Builder
     @output_filename ||= "#{app_name}_#{config.version}.deb"
   end
 
+  def installed_size
+    @installed_size ||= `du -sk ./#{OutputDir}`.split[0]
+  end
+
   def load_configuration
     @config = Dist::Configuration.new
   end
