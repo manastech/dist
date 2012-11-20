@@ -6,6 +6,10 @@ default:
   - libssl-dev
 elasticsearch:
   - elasticsearch
+libcairo:
+  - libcairo2-dev
+libpango:
+  - libpango1.0-dev
 libxml2:
   - libxml2-dev
 libxslt:

@@ -1,5 +1,7 @@
 amqp:
   - rabbitmq
+cairo:
+  - libcairo
 mysql:
   - mysql
 mysql2:
@@ -7,6 +9,8 @@ mysql2:
 nokogiri:
   - libxml2
   - libxslt
+pango:
+  - libpango
 resque:
   - redis
 tire:
