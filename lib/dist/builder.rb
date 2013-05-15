@@ -19,6 +19,7 @@ class Dist::Builder
   end
 
   def build
+    check_executable
     load_configuration
     compute_packages
     compile_assets if !@options[:skip_assets] && assets_enabled
@@ -127,6 +128,15 @@ class Dist::Builder
 
     %w(postinst prerm postrm config).each do |control_file|
       chmod 0755, "#{OutputDir}/DEBIAN/#{control_file}"
+    end
+  end
+
+  def check_executable
+    ['fakeroot', 'dpkg-deb'].each do |executable|
+      `which #{executable}`
+      if !$?.success?
+        error "missing #{executable} executable, plese install it"
+      end
     end
   end
 
