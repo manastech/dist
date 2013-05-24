@@ -4,6 +4,7 @@ default:
   - build-essential
   - libcurl4-openssl-dev
   - libssl-dev
+  - libpcre3-dev
 elasticsearch:
   - elasticsearch
 libcairo:
