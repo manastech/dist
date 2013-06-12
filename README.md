@@ -27,6 +27,18 @@ A typical `config/dist.rb` file looks like this:
     set :summary, 'Demonstrates the usage of dist'
 
     use :mail
+    
+## Settings
+
+To prompt for settings while installing the package yo:
+
+    config :settings do
+      string :host, prompt: "Enter the host name"
+    end
+    
+This will prompt the user to enter a host name. The installer package will replace the key 'host' inside 'config/settings.yml' with the inputted value.
+
+If settings.yml contains a 'production' key, 'host' will be replaced inside 'production'.
 
 ## Contributing
 
