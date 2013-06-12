@@ -60,7 +60,9 @@ class Dist::Builder
   end
 
   def compile_assets
-    system 'bundle exec rake assets:clean assets:precompile'
+    unless system 'bundle exec rake assets:clean assets:precompile'
+      error "failed to precompile assets"
+    end
   end
 
   def build_output
@@ -141,7 +143,9 @@ class Dist::Builder
   end
 
   def build_package
-    system "fakeroot dpkg-deb --build #{OutputDir} #{output_filename}"
+    unless system "fakeroot dpkg-deb --build #{OutputDir} #{output_filename}"
+      error "failed to build package"
+    end
   end
 
   def app_name
