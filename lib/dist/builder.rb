@@ -74,8 +74,7 @@ class Dist::Builder
 
   def build_output
     rmtree OutputDir
-    rm_f output_filename
-
+    
     dirs = %W[
       DEBIAN
       etc/#{app_name}
@@ -92,7 +91,9 @@ class Dist::Builder
     dirs.each { |dir| mkdir_p "#{OutputDir}/#{dir}" }
 
     files = Dir['*'] - %w(log tmp test spec)
-    files.each { |file| cp_r file, "#{OutputDir}/#{app_root}" }
+    files.each do |file|
+      cp_r file, "#{OutputDir}/#{app_root}" unless file.end_with?('.deb')
+    end
 
     ln_s "/var/lib/#{app_name}/bundle", "#{OutputDir}/#{app_root}/vendor/bundle"
     ln_s "/var/lib/#{app_name}/gems", "#{OutputDir}/#{app_root}/.gems"
