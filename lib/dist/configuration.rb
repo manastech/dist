@@ -3,11 +3,15 @@ class Dist::Configuration
 
   attr_reader :dependencies
   attr_reader :sections
+  attr_reader :after_install_commands
+  attr_reader :before_build_commands
 
   def initialize
     @vars = {}
     @dependencies = []
     @sections = []
+    @after_install_commands = []
+    @before_build_commands = []
 
     config_contents = File.read("config/dist.rb") rescue error("config/dist.rb file not found. Please run `dist init`.")
     instance_eval config_contents
@@ -15,6 +19,14 @@ class Dist::Configuration
 
   def set(name, value)
     @vars[name] = value
+  end
+
+  def get(name)
+    if @vars.has_key?(name)
+      @vars[name]
+    else
+      error "missing setting '#{name}'"
+    end
   end
 
   def use(service)
@@ -25,6 +37,14 @@ class Dist::Configuration
     config_section = Section.new(section)
     config_section.instance_eval &block
     @sections << config_section
+  end
+
+  def after_install(command)
+    @after_install_commands << command
+  end
+
+  def before_build(command)
+    @before_build_commands << command
   end
 
   def method_missing(name, *args)

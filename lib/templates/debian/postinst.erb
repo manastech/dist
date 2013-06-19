@@ -80,6 +80,10 @@ EOF
 
     <%= render 'debian/postinst-db' if has_database? %>
 
+    <% config.after_install_commands.each do |command| %>
+      $BUNDLE exec <%=  command%>
+    <% end %>
+
     start <%= app_name %>
 
   ;;

@@ -23,6 +23,7 @@ class Dist::Builder
     load_configuration
     compute_packages
     compile_assets if !@options[:skip_assets] && assets_enabled
+    execute_before_build_commands
     build_output
     move_config_files
     generate_logrotate
@@ -45,6 +46,12 @@ class Dist::Builder
       require './config/boot'
       require './config/application'
       Rails
+    end
+  end
+
+  def execute_before_build_commands
+    config.before_build_commands.each do |command|
+      system command
     end
   end
 
