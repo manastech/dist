@@ -56,11 +56,11 @@ EOF
     fi
     chmod 0775 /var/log/<%= app_name %>/
     touch /var/log/<%= app_name %>/production.log
-    chmod 0664 /var/log/<%= app_name %>/production.log
+    chmod 0664 /var/log/<%= app_name %>/*
     chmod 0775 /var/lib/<%= app_name %>/tmp
     chown -R root:<%= app_name %> /etc/<%= app_name %>/
-    chown -R root:<%= app_name %> /var/log/<%= app_name %>/
-    chown -R root:<%= app_name %> /var/lib/<%= app_name %>/tmp
+    chown -R <%= app_name %>:<%= app_name %> /var/log/<%= app_name %>/
+    chown -R <%= app_name %>:<%= app_name %> /var/lib/<%= app_name %>/tmp
 
 
     # Install base gems and the application bundle
