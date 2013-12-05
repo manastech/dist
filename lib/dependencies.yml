@@ -20,6 +20,8 @@ mail:
 mysql:
   - mysql-server
   - libmysqlclient-dev
+nodejs:
+  - nodejs
 rabbitmq:
   - rabbitmq-server
 redis:
