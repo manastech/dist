@@ -18,7 +18,7 @@ class Dist::YamlLoader
   end
 
   def load_from_url(filename)
-    uri = URI.parse("https://raw.github.com/manastech/dist/master/lib/#{filename}.yml")
+    uri = URI.parse("https://raw.githubusercontent.com/manastech/dist/master/lib/#{filename}.yml")
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
