@@ -15,3 +15,5 @@ resque:
   - redis
 tire:
   - elasticsearch
+elasticsearch:
+  - elasticsearch

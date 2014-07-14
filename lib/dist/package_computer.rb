@@ -36,7 +36,11 @@ class Dist::PackageComputer
   end
 
   def add_dependencies_from_bundle
+    use_git = false
     Bundler.load.specs.each do |spec|
+      if spec.respond_to?(:source) && spec.source.class == Bundler::Source::Git
+        use_git = true
+      end
       gem_depenencies = @gems_yml[spec.name]
       if gem_depenencies
         printed_gem = false
@@ -52,6 +56,9 @@ class Dist::PackageComputer
           end
         end
       end
+    end
+    if use_git
+      add_packages_from_dependency('git')
     end
   end
 
