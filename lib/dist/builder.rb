@@ -74,7 +74,7 @@ class Dist::Builder
 
   def build_output
     rmtree OutputDir
-    
+
     dirs = %W[
       DEBIAN
       etc/#{app_name}
@@ -145,7 +145,7 @@ class Dist::Builder
     ['fakeroot', 'dpkg-deb'].each do |executable|
       `which #{executable}`
       if !$?.success?
-        error "missing #{executable} executable, plese install it"
+        error "missing #{executable} executable, please install it"
       end
     end
   end
