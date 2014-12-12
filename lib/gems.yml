@@ -18,4 +18,4 @@ tire:
 elasticsearch:
   - elasticsearch
 ffi-rzmq:
-  - libzmq3-dev
+  - zeromq3
