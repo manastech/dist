@@ -29,3 +29,5 @@ rabbitmq:
   - rabbitmq-server
 redis:
   - redis-server
+zeromq3:
+  - libzmq3-dev
